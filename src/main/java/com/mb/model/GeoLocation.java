@@ -15,7 +15,7 @@ public class GeoLocation {
 	private static final double MIN_LON = Math.toRadians(-180d); // -PI
 	private static final double MAX_LON = Math.toRadians(180d);  //  PI
 	
-	private static final double EARTH_RADIUS_IN_KM = 6371.01;
+	public static final double EARTH_RADIUS_IN_KM = 6371.01;
 
 	private GeoLocation () {
 	}
