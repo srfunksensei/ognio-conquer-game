@@ -1,5 +1,6 @@
 package com.mb.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 public class GeoLocation {
@@ -101,7 +102,7 @@ public class GeoLocation {
 	 * array element.</li>
 	 * </ul>
 	 */
-	public GeoLocation[] boundingCoordinates(double distance) {
+	public BoundingCoordinates boundingCoordinates(double distance) {
 
 		if (distance < 0d) {
 			throw new IllegalArgumentException();
@@ -134,8 +135,13 @@ public class GeoLocation {
 			maxLon = MAX_LON;
 		}
 
-		return new GeoLocation[]{fromRadians(minLat, minLon),
-				fromRadians(maxLat, maxLon)};
+		return new BoundingCoordinates(fromRadians(minLat, minLon), fromRadians(maxLat, maxLon));
 	}
 
+	@AllArgsConstructor
+	@Getter
+	public static class BoundingCoordinates {
+		private GeoLocation min;
+		private GeoLocation max;
+	}
 }

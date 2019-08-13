@@ -28,21 +28,17 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 
 	private List<GameLocation> filterPlacesWithinDistance(final List<GameLocation> allLocations,
 			final GeoLocation location, final double distance) {
-		final GeoLocation[] boundingCoordinates = location.boundingCoordinates(distance);
-		final double lowerBoundLatRadians = boundingCoordinates[0].getRadLat(),
-				upperBoundLatRadians = boundingCoordinates[1].getRadLat(),
-				lowerBoundLonRadians = boundingCoordinates[0].getRadLon(),
-				upperBoundLonRadians = boundingCoordinates[1].getRadLon();
+		final GeoLocation.BoundingCoordinates bounds = location.boundingCoordinates(distance);
 
 		final Map<Long, GeoLocation> allLocationsMap = allLocations.stream().collect(
 				Collectors.toMap(GameLocation::getId, e -> GeoLocation.fromDegrees(e.getDegLat(), e.getDegLon())));
 		final Set<Long> locationIds = allLocationsMap.entrySet().stream() //
-				.filter(entry -> isLatBetween(lowerBoundLatRadians, upperBoundLatRadians) //
-						.and(isLonBetween(lowerBoundLonRadians, upperBoundLonRadians)) //
+				.filter(entry -> isLatBetween(bounds.getMin().getRadLat(), bounds.getMax().getRadLat()) //
+						.and(isLonBetween(bounds.getMin().getRadLon(), bounds.getMax().getRadLon())) //
 						.and(isWithinDistance(location, distance)).test(entry.getValue())) //
 				.map(Map.Entry::getKey) //
 				.collect(Collectors.toSet());
-		
+
 		return allLocations.stream().filter(e -> locationIds.contains(e.getId())).collect(Collectors.toList());
 	}
 

@@ -32,24 +32,26 @@ public class GeoLocationTest {
 		final GeoLocation noviSadLoc = GeoLocation.fromDegrees(45.267136, 19.833549);
 		
 		final double distance = BELGRADE_LOC_DEGREES.distanceTo(noviSadLoc);
-		assertEquals(71.51841703233163, distance, DELTA);
+		assertEquals(72.46195698645441, distance, DELTA);
 	}
 	
 	@Test
 	public void testBoundingComponentsWithing50km() {
 		final double fiftyKm = 50;
-		GeoLocation[] boundingCoordinates = BELGRADE_LOC_DEGREES.boundingCoordinates(fiftyKm);
+		GeoLocation.BoundingCoordinates boundingCoordinates = BELGRADE_LOC_DEGREES.boundingCoordinates(fiftyKm);
 		
 		final GeoLocation nearRabasLoc = GeoLocation.fromDegrees(44.33753690283266, 19.823699946747226),
 				nearPlandisteLoc = GeoLocation.fromDegrees(45.23685709716734, 21.09084605325278);
-		final GeoLocation[] expectedCoordinates = {nearRabasLoc, nearPlandisteLoc};
+		final GeoLocation.BoundingCoordinates expectedCoordinates = new GeoLocation.BoundingCoordinates(nearRabasLoc, nearPlandisteLoc);
 		
-		assertEquals(expectedCoordinates.length, boundingCoordinates.length);
-		for (int i = 0; i < expectedCoordinates.length; i++) {
-			assertEquals(expectedCoordinates[i].getDegLat(), boundingCoordinates[i].getDegLat(), DELTA);
-			assertEquals(expectedCoordinates[i].getDegLon(), boundingCoordinates[i].getDegLon(), DELTA);
-			assertEquals(expectedCoordinates[i].getRadLat(), boundingCoordinates[i].getRadLat(), DELTA);
-			assertEquals(expectedCoordinates[i].getRadLon(), boundingCoordinates[i].getRadLon(), DELTA);
-		}
+		assertEquals(expectedCoordinates.getMax().getDegLat(), boundingCoordinates.getMax().getDegLat(), DELTA);
+		assertEquals(expectedCoordinates.getMax().getDegLon(), boundingCoordinates.getMax().getDegLon(), DELTA);
+		assertEquals(expectedCoordinates.getMin().getDegLat(), boundingCoordinates.getMin().getDegLat(), DELTA);
+		assertEquals(expectedCoordinates.getMin().getDegLon(), boundingCoordinates.getMin().getDegLon(), DELTA);
+
+		assertEquals(expectedCoordinates.getMax().getRadLat(), boundingCoordinates.getMax().getRadLat(), DELTA);
+		assertEquals(expectedCoordinates.getMax().getRadLon(), boundingCoordinates.getMax().getRadLon(), DELTA);
+		assertEquals(expectedCoordinates.getMin().getRadLat(), boundingCoordinates.getMin().getRadLat(), DELTA);
+		assertEquals(expectedCoordinates.getMin().getRadLon(), boundingCoordinates.getMin().getRadLon(), DELTA);
 	}
 }
