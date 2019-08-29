@@ -1,6 +1,7 @@
 package com.mb.service.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,16 +24,11 @@ public class JsonPlaceLoaderStrategy implements PlaceLoaderStrategy {
 	@Autowired
 	private ResourceLoader resourceLoader;
 	
-	private static List<GameLocation> locations;
-
 	@Override
 	public List<GameLocation> load() {
-		if (locations != null) {
-			return locations;
-		}
-		
 		final Resource resource = resourceLoader.getResource("classpath:json/data.json");
 
+		List<GameLocation> locations = new ArrayList<>();
 		try {
 			final JsonGameLocationFileReader reader = new JsonGameLocationFileReader(resource.getFile());
 			locations = reader.read();

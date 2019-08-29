@@ -2,6 +2,7 @@ package com.mb.service.impl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -9,6 +10,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.mb.exception.LocationAlreadyConqueredException;
+import com.mb.exception.LocationNotFoundException;
 import com.mb.model.GameLocation;
 import com.mb.model.GeoLocation;
 import com.mb.service.GeoLocationService;
@@ -17,13 +20,16 @@ import com.mb.service.PlaceLoaderStrategy;
 @Service
 public class GeoLocationServiceImpl implements GeoLocationService {
 
+	private List<GameLocation> locations;
+	
 	@Autowired
-	private PlaceLoaderStrategy loader;
+	public GeoLocationServiceImpl(final PlaceLoaderStrategy loader) {
+		locations = loader.load();
+	}
 
 	@Override
 	public List<GameLocation> findPlacesWithinDistance(GeoLocation location, double distance) {
-		final List<GameLocation> allLocations = loader.load();
-		return filterPlacesWithinDistance(allLocations, location, distance);
+		return filterPlacesWithinDistance(locations, location, distance);
 	}
 
 	private List<GameLocation> filterPlacesWithinDistance(final List<GameLocation> allLocations,
@@ -54,5 +60,25 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 
 	private static Predicate<GeoLocation> isWithinDistance(GeoLocation location, double distance) {
 		return p -> location.distanceTo(p) <= distance;
+	}
+
+	@Override
+	public Optional<GameLocation> getLocation(final long id) {
+		return locations.stream().filter(l -> l.getId() == id).findFirst();
+	}
+
+	@Override
+	public synchronized void conquerLocation(final long id) throws LocationNotFoundException, LocationAlreadyConqueredException {
+		final Optional<GameLocation> locationOpt = getLocation(id);
+		if (!locationOpt.isPresent()) {
+			throw new LocationNotFoundException("Location: " + id + " not found");
+		}
+		
+		final GameLocation location = locationOpt.get();
+		if (location.isMarked()) {
+			throw new LocationAlreadyConqueredException("Location: " + id + " already conquered");
+		}
+		
+		location.setMarked(true);
 	}
 }

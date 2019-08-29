@@ -10,10 +10,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.mb.exception.LocationAlreadyConqueredException;
+import com.mb.exception.LocationNotFoundException;
 import com.mb.model.GameLocation;
 import com.mb.model.GeoLocation;
 import com.mb.service.PlaceLoaderStrategy;
@@ -33,12 +34,13 @@ public class GeoLocationServiceImplTest {
 	@Mock
 	private PlaceLoaderStrategy loaderMock;
 
-	@InjectMocks
 	private GeoLocationServiceImpl geoLocationService;
 
 	@Before
 	public void setup() {
 		when(loaderMock.load()).thenReturn(LOCATIONS_NEAR_BELGRADE);
+		
+		geoLocationService = new GeoLocationServiceImpl(loaderMock);
 	}
 
 	@Test
@@ -63,5 +65,35 @@ public class GeoLocationServiceImplTest {
 
 		final List<GameLocation> result = geoLocationService.findPlacesWithinDistance(BELGRADE_LOC, distanceInKm);
 		Assert.assertEquals(3, result.size());
+	}
+	
+	@Test(expected = LocationNotFoundException.class)
+	public void testNoLocationFoundForConquering() throws LocationNotFoundException, LocationAlreadyConqueredException {
+		geoLocationService.conquerLocation(12345);
+	}
+	
+	@Test(expected = LocationAlreadyConqueredException.class)
+	public void testLocationAlreadyConquered() throws LocationNotFoundException, LocationAlreadyConqueredException {
+		final long id = LOC_11M_RADIUS.getId();
+		
+		geoLocationService.conquerLocation(id);
+	}
+	
+	@Test
+	public void testConquerLocation() {
+		boolean isMarked = LOC_5M_RADIUS.isMarked();
+		
+		final long id = LOC_5M_RADIUS.getId();
+		
+		try {
+			geoLocationService.conquerLocation(id);
+		} catch (LocationNotFoundException | LocationAlreadyConqueredException e) {
+			Assert.fail("Should not throw exception");
+		}
+		
+		Assert.assertTrue(LOC_5M_RADIUS.isMarked());
+		
+		// return to original state
+		LOC_5M_RADIUS.setMarked(isMarked);
 	}
 }
