@@ -31,7 +31,7 @@ public class JsonPlaceLoaderStrategy implements PlaceLoaderStrategy {
 			return locations;
 		}
 		
-		final Resource resource = resourceLoader.getResource("classpath:data.json");
+		final Resource resource = resourceLoader.getResource("classpath:json/data.json");
 
 		try {
 			final JsonGameLocationFileReader reader = new JsonGameLocationFileReader(resource.getFile());
