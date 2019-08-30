@@ -3,6 +3,7 @@ package com.mb.controller;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -236,14 +237,15 @@ public class GeoLocationControllerTest {
 		final long id = 1;
 		final String exceptionMessage = "Location: " + id + " not found";
 
-		doThrow(new LocationNotFoundException(exceptionMessage)).when(geoLocationServiceMock).conquerLocation(id);
+		doThrow(new LocationNotFoundException(exceptionMessage)).when(geoLocationServiceMock).conquerLocation(eq(id), anyLong());
 
 		mvc.perform(put("/locations/" + id) //
+				.content("" + id) //
 				.contentType(MediaType.APPLICATION_JSON)) //
 				.andExpect(status().isNotFound()) //
 				.andExpect(content().string(exceptionMessage));
 
-		verify(geoLocationServiceMock, times(1)).conquerLocation(id);
+		verify(geoLocationServiceMock, times(1)).conquerLocation(eq(id), anyLong());
 		verifyNoMoreInteractions(geoLocationServiceMock);
 	}
 	
@@ -252,28 +254,29 @@ public class GeoLocationControllerTest {
 		final long id = 1;
 		final String exceptionMessage = "Location: " + id + " already conquered";
 
-		doThrow(new LocationAlreadyConqueredException(exceptionMessage)).when(geoLocationServiceMock).conquerLocation(id);
+		doThrow(new LocationAlreadyConqueredException(exceptionMessage)).when(geoLocationServiceMock).conquerLocation(eq(id), anyLong());
 
 		mvc.perform(put("/locations/" + id) //
+				.content("" + id) //
 				.contentType(MediaType.APPLICATION_JSON)) //
 				.andExpect(status().is(409)) //
 				.andExpect(content().string(exceptionMessage));
 
-		verify(geoLocationServiceMock, times(1)).conquerLocation(id);
+		verify(geoLocationServiceMock, times(1)).conquerLocation(eq(id), anyLong());
 		verifyNoMoreInteractions(geoLocationServiceMock);
 	}
 	
 	@Test
 	public void givenLocations_whenConquerLocation_thenReturnOk() throws Exception {
+		doNothing().when(geoLocationServiceMock).conquerLocation(anyLong(), anyLong());
+
 		final long id = 1;
-
-		doNothing().when(geoLocationServiceMock).conquerLocation(id);
-
 		mvc.perform(put("/locations/" + id) //
+				.content("" + id) //
 				.contentType(MediaType.APPLICATION_JSON)) //
 				.andExpect(status().isOk());
 
-		verify(geoLocationServiceMock, times(1)).conquerLocation(id);
+		verify(geoLocationServiceMock, times(1)).conquerLocation(anyLong(), anyLong());
 		verifyNoMoreInteractions(geoLocationServiceMock);
 	}
 }

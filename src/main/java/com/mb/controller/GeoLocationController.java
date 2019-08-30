@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,9 +74,9 @@ public class GeoLocationController {
 	}
 	
 	@PutMapping(value = "/{id}")
-	public HttpEntity<String> conquer(@PathVariable(name = "id") long locationId) {
+	public HttpEntity<String> conquer(@PathVariable(name = "id") long locationId, @RequestBody Long userId) {
 		try {
-			locationService.conquerLocation(locationId);
+			locationService.conquerLocation(locationId, userId);
 		} catch (LocationNotFoundException e) {
 			return new ResponseEntity<>(e.getLocalizedMessage(), HttpStatus.NOT_FOUND);
 		} catch (LocationAlreadyConqueredException e) {

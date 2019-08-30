@@ -13,6 +13,6 @@ public interface GeoLocationService {
 	List<GameLocation> findPlacesWithinDistance(final GeoLocation location, final double distance);
 	
 	Optional<GameLocation> getLocation(final long id);
-	void conquerLocation(final long id) throws LocationNotFoundException, LocationAlreadyConqueredException;
+	void conquerLocation(final long id, final long byUser) throws LocationNotFoundException, LocationAlreadyConqueredException;
 
 }

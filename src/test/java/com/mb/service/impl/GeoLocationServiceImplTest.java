@@ -1,5 +1,7 @@
 package com.mb.service.impl;
 
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -18,6 +20,7 @@ import com.mb.exception.LocationNotFoundException;
 import com.mb.model.GameLocation;
 import com.mb.model.GeoLocation;
 import com.mb.service.PlaceLoaderStrategy;
+import com.mb.service.UserService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeoLocationServiceImplTest {
@@ -33,14 +36,18 @@ public class GeoLocationServiceImplTest {
 
 	@Mock
 	private PlaceLoaderStrategy loaderMock;
+	
+	@Mock
+	private UserService userServiceMock;
 
 	private GeoLocationServiceImpl geoLocationService;
 
 	@Before
 	public void setup() {
 		when(loaderMock.load()).thenReturn(LOCATIONS_NEAR_BELGRADE);
+		doNothing().when(userServiceMock).increasePoints(anyLong(), anyLong());
 		
-		geoLocationService = new GeoLocationServiceImpl(loaderMock);
+		geoLocationService = new GeoLocationServiceImpl(loaderMock, userServiceMock);
 	}
 
 	@Test
@@ -69,14 +76,14 @@ public class GeoLocationServiceImplTest {
 	
 	@Test(expected = LocationNotFoundException.class)
 	public void testNoLocationFoundForConquering() throws LocationNotFoundException, LocationAlreadyConqueredException {
-		geoLocationService.conquerLocation(12345);
+		geoLocationService.conquerLocation(12345, 12345);
 	}
 	
 	@Test(expected = LocationAlreadyConqueredException.class)
 	public void testLocationAlreadyConquered() throws LocationNotFoundException, LocationAlreadyConqueredException {
 		final long id = LOC_11M_RADIUS.getId();
 		
-		geoLocationService.conquerLocation(id);
+		geoLocationService.conquerLocation(id, 12345);
 	}
 	
 	@Test
@@ -86,7 +93,7 @@ public class GeoLocationServiceImplTest {
 		final long id = LOC_5M_RADIUS.getId();
 		
 		try {
-			geoLocationService.conquerLocation(id);
+			geoLocationService.conquerLocation(id, 12345);
 		} catch (LocationNotFoundException | LocationAlreadyConqueredException e) {
 			Assert.fail("Should not throw exception");
 		}

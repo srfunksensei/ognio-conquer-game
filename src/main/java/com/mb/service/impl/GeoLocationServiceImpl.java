@@ -16,15 +16,19 @@ import com.mb.model.GameLocation;
 import com.mb.model.GeoLocation;
 import com.mb.service.GeoLocationService;
 import com.mb.service.PlaceLoaderStrategy;
+import com.mb.service.UserService;
 
 @Service
 public class GeoLocationServiceImpl implements GeoLocationService {
 
 	private List<GameLocation> locations;
 	
+	private UserService userService;
+	
 	@Autowired
-	public GeoLocationServiceImpl(final PlaceLoaderStrategy loader) {
+	public GeoLocationServiceImpl(final PlaceLoaderStrategy loader, final UserService userService) {
 		locations = loader.load();
+		this.userService = userService;
 	}
 
 	@Override
@@ -68,7 +72,7 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 	}
 
 	@Override
-	public synchronized void conquerLocation(final long id) throws LocationNotFoundException, LocationAlreadyConqueredException {
+	public synchronized void conquerLocation(final long id, final long byUser) throws LocationNotFoundException, LocationAlreadyConqueredException {
 		final Optional<GameLocation> locationOpt = getLocation(id);
 		if (!locationOpt.isPresent()) {
 			throw new LocationNotFoundException("Location: " + id + " not found");
@@ -80,5 +84,7 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 		}
 		
 		location.setMarked(true);
+		
+		userService.increasePoints(byUser, 1);
 	}
 }
