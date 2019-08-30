@@ -5,11 +5,15 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,6 +31,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.mb.exception.LocationAlreadyConqueredException;
+import com.mb.exception.LocationNotFoundException;
 import com.mb.model.GameLocation;
 import com.mb.model.GeoLocation;
 import com.mb.service.GeoLocationService;
@@ -222,6 +228,52 @@ public class GeoLocationControllerTest {
 				.andExpect(jsonPath("$[0].id", equalTo((int) loc5mRadiusFromBg.getId())));
 
 		verify(geoLocationServiceMock, times(1)).findPlacesWithinDistance(any(GeoLocation.class), anyDouble());
+		verifyNoMoreInteractions(geoLocationServiceMock);
+	}
+	
+	@Test
+	public void givenLocations_whenConquerLocation_thenReturnNotFound() throws Exception {
+		final long id = 1;
+		final String exceptionMessage = "Location: " + id + " not found";
+
+		doThrow(new LocationNotFoundException(exceptionMessage)).when(geoLocationServiceMock).conquerLocation(id);
+
+		mvc.perform(put("/locations/" + id) //
+				.contentType(MediaType.APPLICATION_JSON)) //
+				.andExpect(status().isNotFound()) //
+				.andExpect(content().string(exceptionMessage));
+
+		verify(geoLocationServiceMock, times(1)).conquerLocation(id);
+		verifyNoMoreInteractions(geoLocationServiceMock);
+	}
+	
+	@Test
+	public void givenLocations_whenConquerLocation_thenReturnAlreadyConquered() throws Exception {
+		final long id = 1;
+		final String exceptionMessage = "Location: " + id + " already conquered";
+
+		doThrow(new LocationAlreadyConqueredException(exceptionMessage)).when(geoLocationServiceMock).conquerLocation(id);
+
+		mvc.perform(put("/locations/" + id) //
+				.contentType(MediaType.APPLICATION_JSON)) //
+				.andExpect(status().is(409)) //
+				.andExpect(content().string(exceptionMessage));
+
+		verify(geoLocationServiceMock, times(1)).conquerLocation(id);
+		verifyNoMoreInteractions(geoLocationServiceMock);
+	}
+	
+	@Test
+	public void givenLocations_whenConquerLocation_thenReturnOk() throws Exception {
+		final long id = 1;
+
+		doNothing().when(geoLocationServiceMock).conquerLocation(id);
+
+		mvc.perform(put("/locations/" + id) //
+				.contentType(MediaType.APPLICATION_JSON)) //
+				.andExpect(status().isOk());
+
+		verify(geoLocationServiceMock, times(1)).conquerLocation(id);
 		verifyNoMoreInteractions(geoLocationServiceMock);
 	}
 }

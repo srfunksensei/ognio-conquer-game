@@ -11,10 +11,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mb.exception.LocationAlreadyConqueredException;
+import com.mb.exception.LocationNotFoundException;
 import com.mb.model.GameLocation;
 import com.mb.model.GeoLocation;
 import com.mb.service.GeoLocationService;
@@ -66,5 +70,18 @@ public class GeoLocationController {
 		pagedListHolder.setPageSize(pageable.getPageSize());
 
 		return pagedListHolder.getPageList();
+	}
+	
+	@PutMapping(value = "/{id}")
+	public HttpEntity<String> conquer(@PathVariable(name = "id") long locationId) {
+		try {
+			locationService.conquerLocation(locationId);
+		} catch (LocationNotFoundException e) {
+			return new ResponseEntity<>(e.getLocalizedMessage(), HttpStatus.NOT_FOUND);
+		} catch (LocationAlreadyConqueredException e) {
+			return new ResponseEntity<>(e.getLocalizedMessage(), HttpStatus.CONFLICT);
+		}
+		
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 }
