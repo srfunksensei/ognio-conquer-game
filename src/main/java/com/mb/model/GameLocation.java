@@ -9,10 +9,10 @@ import lombok.Setter;
 @EqualsAndHashCode
 public final class GameLocation {
 	
-	@Getter private long id;
+	@Getter private final long id;
 	
-	@Getter private double degLat;  // latitude in degrees
-	@Getter private double degLon;  // longitude in degrees
+	@Getter private final double degLat;  // latitude in degrees
+	@Getter private final double degLon;  // longitude in degrees
 	
 	@Getter @Setter private boolean marked;
 }
