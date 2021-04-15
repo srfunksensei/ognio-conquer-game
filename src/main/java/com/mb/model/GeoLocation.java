@@ -25,8 +25,8 @@ public class GeoLocation {
 	 * @param latitude the latitude, in degrees.
 	 * @param longitude the longitude, in degrees.
 	 */
-	public static GeoLocation fromDegrees(double latitude, double longitude) {
-		GeoLocation result = new GeoLocation();
+	public static GeoLocation fromDegrees(final double latitude, final double longitude) {
+		final GeoLocation result = new GeoLocation();
 		result.radLat = Math.toRadians(latitude);
 		result.radLon = Math.toRadians(longitude);
 		result.degLat = latitude;
@@ -39,8 +39,8 @@ public class GeoLocation {
 	 * @param latitude the latitude, in radians.
 	 * @param longitude the longitude, in radians.
 	 */
-	public static GeoLocation fromRadians(double latitude, double longitude) {
-		GeoLocation result = new GeoLocation();
+	public static GeoLocation fromRadians(final double latitude, final double longitude) {
+		final GeoLocation result = new GeoLocation();
 		result.radLat = latitude;
 		result.radLon = longitude;
 		result.degLat = Math.toDegrees(latitude);
@@ -68,7 +68,7 @@ public class GeoLocation {
 	 * 
 	 * @return the distance measured in km
 	 */
-	public double distanceTo(GeoLocation location) {
+	public double distanceTo(final GeoLocation location) {
 		return Math.acos(Math.sin(radLat) * Math.sin(location.radLat) +
 				Math.cos(radLat) * Math.cos(location.radLat) *
 				Math.cos(radLon - location.radLon)) * EARTH_RADIUS_IN_KM;
@@ -102,7 +102,7 @@ public class GeoLocation {
 	 * array element.</li>
 	 * </ul>
 	 */
-	public BoundingCoordinates boundingCoordinates(double distance) {
+	public BoundingCoordinates boundingCoordinates(final double distance) {
 
 		if (distance < 0d) {
 			throw new IllegalArgumentException();
@@ -141,7 +141,7 @@ public class GeoLocation {
 	@AllArgsConstructor
 	@Getter
 	public static class BoundingCoordinates {
-		private GeoLocation min;
-		private GeoLocation max;
+		private final GeoLocation min;
+		private final GeoLocation max;
 	}
 }
