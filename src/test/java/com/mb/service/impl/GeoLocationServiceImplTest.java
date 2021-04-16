@@ -1,13 +1,11 @@
 package com.mb.service.impl;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
+import com.mb.exception.LocationAlreadyConqueredException;
+import com.mb.exception.LocationNotFoundException;
+import com.mb.model.GameLocation;
+import com.mb.model.GeoLocation;
+import com.mb.service.PlaceLoaderStrategy;
+import com.mb.service.UserService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,12 +13,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.mb.exception.LocationAlreadyConqueredException;
-import com.mb.exception.LocationNotFoundException;
-import com.mb.model.GameLocation;
-import com.mb.model.GeoLocation;
-import com.mb.service.PlaceLoaderStrategy;
-import com.mb.service.UserService;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeoLocationServiceImplTest {
@@ -73,21 +73,33 @@ public class GeoLocationServiceImplTest {
 		final List<GameLocation> result = geoLocationService.findPlacesWithinDistance(BELGRADE_LOC, distanceInKm);
 		Assert.assertEquals(3, result.size());
 	}
+
+	@Test
+	public void getLocation_NoLocationWithId() {
+		final Optional<GameLocation> locationOpt = geoLocationService.getLocation(22);
+		Assert.assertFalse(locationOpt.isPresent());
+	}
+
+	@Test
+	public void getLocation() {
+		final Optional<GameLocation> locationOpt = geoLocationService.getLocation(1);
+		Assert.assertTrue(locationOpt.isPresent());
+	}
 	
 	@Test(expected = LocationNotFoundException.class)
-	public void testNoLocationFoundForConquering() throws LocationNotFoundException, LocationAlreadyConqueredException {
+	public void conquerLocation_NoLocationFoundForConquering() throws LocationNotFoundException, LocationAlreadyConqueredException {
 		geoLocationService.conquerLocation(12345, 12345);
 	}
 	
 	@Test(expected = LocationAlreadyConqueredException.class)
-	public void testLocationAlreadyConquered() throws LocationNotFoundException, LocationAlreadyConqueredException {
+	public void conquerLocation_LocationAlreadyConquered() throws LocationNotFoundException, LocationAlreadyConqueredException {
 		final long id = LOC_11M_RADIUS.getId();
 		
 		geoLocationService.conquerLocation(id, 12345);
 	}
 	
 	@Test
-	public void testConquerLocation() {
+	public void conquerLocation() {
 		boolean isMarked = LOC_5M_RADIUS.isMarked();
 		
 		final long id = LOC_5M_RADIUS.getId();

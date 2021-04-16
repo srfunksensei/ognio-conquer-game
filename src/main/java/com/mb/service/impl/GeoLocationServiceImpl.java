@@ -1,15 +1,5 @@
 package com.mb.service.impl;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.mb.exception.LocationAlreadyConqueredException;
 import com.mb.exception.LocationNotFoundException;
 import com.mb.model.GameLocation;
@@ -17,22 +7,29 @@ import com.mb.model.GeoLocation;
 import com.mb.service.GeoLocationService;
 import com.mb.service.PlaceLoaderStrategy;
 import com.mb.service.UserService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class GeoLocationServiceImpl implements GeoLocationService {
 
-	private List<GameLocation> locations;
+	private final List<GameLocation> locations;
 	
-	private UserService userService;
+	private final UserService userService;
 	
-	@Autowired
 	public GeoLocationServiceImpl(final PlaceLoaderStrategy loader, final UserService userService) {
-		locations = loader.load();
+		this.locations = loader.load();
 		this.userService = userService;
 	}
 
 	@Override
-	public List<GameLocation> findPlacesWithinDistance(GeoLocation location, double distance) {
+	public List<GameLocation> findPlacesWithinDistance(final GeoLocation location, final double distance) {
 		return filterPlacesWithinDistance(locations, location, distance);
 	}
 
@@ -52,17 +49,17 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 		return allLocations.stream().filter(e -> locationIds.contains(e.getId())).collect(Collectors.toList());
 	}
 
-	private static Predicate<GeoLocation> isLatBetween(double lowerBoundRadians, double upperBoundRadians) {
+	private static Predicate<GeoLocation> isLatBetween(final double lowerBoundRadians, final double upperBoundRadians) {
 		return p -> p.getRadLat() >= lowerBoundRadians && p.getRadLat() <= upperBoundRadians;
 	}
 
-	private static Predicate<GeoLocation> isLonBetween(double lowerBoundRadians, double upperBoundRadians) {
+	private static Predicate<GeoLocation> isLonBetween(final double lowerBoundRadians, final double upperBoundRadians) {
 		return lowerBoundRadians > upperBoundRadians
 				? p -> p.getRadLon() >= lowerBoundRadians || p.getRadLon() <= upperBoundRadians
 				: p -> p.getRadLon() >= lowerBoundRadians && p.getRadLon() <= upperBoundRadians;
 	}
 
-	private static Predicate<GeoLocation> isWithinDistance(GeoLocation location, double distance) {
+	private static Predicate<GeoLocation> isWithinDistance(final GeoLocation location, final double distance) {
 		return p -> location.distanceTo(p) <= distance;
 	}
 
