@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.assertj.core.util.Files;
@@ -15,7 +16,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.mb.model.GameLocation;
-import com.mb.service.util.JsonGameLocationFileReader;
 
 public class JsonGameLocationFileReaderTest {
 
@@ -88,7 +88,7 @@ public class JsonGameLocationFileReaderTest {
 	public void testBadFormedJson() {
 		final File f = createNewFileInTempDir(TEST_JSON_FILE_NAME);
 
-		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"))) {
+		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8))) {
 			writer.write("{}");
 		} catch (Exception e1) {
 			Assert.fail("Expected to write data to file");
@@ -106,15 +106,13 @@ public class JsonGameLocationFileReaderTest {
 	public void testEmptyLocationList() {
 		final File f = createNewFileInTempDir(TEST_JSON_FILE_NAME);
 		
-		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"))) {
-			final StringBuilder sb = new StringBuilder();
-			sb.append("{").append("\n")
-				.append("\"type\":\"FeatureCollection\",").append("\n")
-				.append("\"features\":{").append("\n")
-				.append("}").append("\n")
-				.append("}");
-			
-			writer.write(sb.toString());
+		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8))) {
+			final String value = "{\n" +
+					"\"type\":\"FeatureCollection\",\n" +
+					"\"features\":{\n" +
+					"}\n" +
+					"}";
+			writer.write(value);
 		} catch (Exception e1) {
 			Assert.fail("Expected to write data to file");
 		}
@@ -135,29 +133,27 @@ public class JsonGameLocationFileReaderTest {
 		
 		final File f = createNewFileInTempDir(TEST_JSON_FILE_NAME);
 		
-		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"))) {
-			final StringBuilder sb = new StringBuilder();
-			sb.append("{").append("\n")
-				.append("\"type\":\"FeatureCollection\",").append("\n")
-				.append("\"" + JsonGameLocationFileReader.FEATURES_KEY + "\":{").append("\n")
-				.append("\"" + loc.getId() + "\":{").append("\n")
-				.append("\"" + JsonGameLocationFileReader.FEATURE_TYPE + "\":\"Feature\",").append("\n")
-				.append("\"" + JsonGameLocationFileReader.FEATURE_GEOMETYRY_KEY + "\":{").append("\n")
-				.append("\"" + JsonGameLocationFileReader.FEATURE_TYPE + "\":\"Point\",").append("\n")
-				.append("\"" + JsonGameLocationFileReader.FEATURE_GEOMETYRY_COORDINATES_KEY + "\":[").append("\n")
-				.append(loc.getDegLon() + ",").append("\n")
-				.append(loc.getDegLat()).append("\n")
-				.append("]").append("\n")
-				.append("},").append("\n")
-				.append("\"" + JsonGameLocationFileReader.FEATURE_PROPERTIES_KEY + "\":{").append("\n")
-				.append("\"" + JsonGameLocationFileReader.FEATURE_PROPERTIES_ID_KEY + "\":\"" + loc.getId() + "\",").append("\n")
-				.append("\"" + JsonGameLocationFileReader.FEATURE_PROPERTIES_MARKED_KEY + "\":" + loc.isMarked() + "").append("\n")
-				.append("}").append("\n")
-				.append("}").append("\n")
-				.append("}").append("\n")
-				.append("}");
-			
-			writer.write(sb.toString());
+		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8))) {
+			final String value = "{" + "\n" +
+					"\"type\":\"FeatureCollection\"," + "\n" +
+					"\"" + JsonGameLocationFileReader.FEATURES_KEY + "\":{" + "\n" +
+					"\"" + loc.getId() + "\":{" + "\n" +
+					"\"" + JsonGameLocationFileReader.FEATURE_TYPE + "\":\"Feature\"," + "\n" +
+					"\"" + JsonGameLocationFileReader.FEATURE_GEOMETRY_KEY + "\":{" + "\n" +
+					"\"" + JsonGameLocationFileReader.FEATURE_TYPE + "\":\"Point\"," + "\n" +
+					"\"" + JsonGameLocationFileReader.FEATURE_GEOMETRY_COORDINATES_KEY + "\":[" + "\n" +
+					loc.getDegLon() + "," + "\n" +
+					loc.getDegLat() + "\n" +
+					"]" + "\n" +
+					"}," + "\n" +
+					"\"" + JsonGameLocationFileReader.FEATURE_PROPERTIES_KEY + "\":{" + "\n" +
+					"\"" + JsonGameLocationFileReader.FEATURE_PROPERTIES_ID_KEY + "\":\"" + loc.getId() + "\"," + "\n" +
+					"\"" + JsonGameLocationFileReader.FEATURE_PROPERTIES_MARKED_KEY + "\":" + loc.isMarked() + "" + "\n" +
+					"}" + "\n" +
+					"}" + "\n" +
+					"}" + "\n" +
+					"}";
+			writer.write(value);
 		} catch (Exception e1) {
 			Assert.fail("Expected to write data to file");
 		}
