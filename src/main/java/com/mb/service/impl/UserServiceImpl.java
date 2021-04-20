@@ -10,26 +10,16 @@ import com.mb.service.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-	final Map<Long, Long> usersWithPoints = new HashMap<>();
+	private final Map<Long, Long> usersWithPoints = new HashMap<>();
 
 	@Override
-	public void increasePoints(final long forUserId, final long by) {
-		long points = by;
-		
-		if (usersWithPoints.containsKey(forUserId)) {
-			points += usersWithPoints.get(forUserId);
-		}
-		
-		usersWithPoints.put(forUserId, points);
+	public synchronized void increasePoints(final long forUserId, final long by) {
+		usersWithPoints.compute(forUserId, (key, val) -> (val == null) ? by : val + by);
 	}
 
 	@Override
-	public long getPoints(final long forUserId) {
-		if (!usersWithPoints.containsKey(forUserId)) {
-			return 0;
-		}
-
-		return usersWithPoints.get(forUserId);
+	public synchronized long getPoints(final long forUserId) {
+		return usersWithPoints.getOrDefault(forUserId, 0L);
 	}
 
 }
