@@ -24,7 +24,7 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 	private final UserService userService;
 	
 	public GeoLocationServiceImpl(final PlaceLoaderStrategy loader, final UserService userService) {
-		this.locations = loader.load();
+		this.locations = loader.load(Optional.empty());
 		this.userService = userService;
 	}
 

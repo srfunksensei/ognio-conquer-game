@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -44,7 +45,7 @@ public class GeoLocationServiceImplTest {
 
 	@Before
 	public void setup() {
-		when(loaderMock.load()).thenReturn(LOCATIONS_NEAR_BELGRADE);
+		when(loaderMock.load(any())).thenReturn(LOCATIONS_NEAR_BELGRADE);
 		doNothing().when(userServiceMock).increasePoints(anyLong(), anyLong());
 		
 		geoLocationService = new GeoLocationServiceImpl(loaderMock, userServiceMock);
