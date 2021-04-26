@@ -31,11 +31,11 @@ public class UserControllerTest {
 	private UserService userServiceMock;
 	
 	@Test
-	public void givenUser_whenGetUser_thenReturnNumber() throws Exception {
-		final long id = 1;
+	public void givenUser_whenGetUserPoints_thenReturnNumber() throws Exception {
+		final long userId = 1;
 		when(userServiceMock.getPoints(anyLong())).thenReturn(0L);
 
-		mvc.perform(get("/users/" + id) //
+		mvc.perform(get("/users/" + userId + "/points") //
 				.contentType(MediaType.APPLICATION_JSON)) //
 				.andExpect(status().isOk()) //
 				.andExpect(content().string("0"));
