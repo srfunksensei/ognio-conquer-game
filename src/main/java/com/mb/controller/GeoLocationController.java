@@ -1,8 +1,10 @@
 package com.mb.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.mb.exception.LocationAlreadyConqueredException;
+import com.mb.exception.LocationNotFoundException;
+import com.mb.model.GameLocation;
+import com.mb.model.GeoLocation;
+import com.mb.service.GeoLocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.support.PagedListHolder;
@@ -10,19 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.mb.exception.LocationAlreadyConqueredException;
-import com.mb.exception.LocationNotFoundException;
-import com.mb.model.GameLocation;
-import com.mb.model.GeoLocation;
-import com.mb.service.GeoLocationService;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/locations")
@@ -31,7 +24,7 @@ public class GeoLocationController {
 	@Value("${locations.distance.default}")
 	private double distance;
 
-	private GeoLocationService locationService;
+	private final GeoLocationService locationService;
 
 	@Autowired
 	public GeoLocationController(final GeoLocationService locationService) {
@@ -40,8 +33,8 @@ public class GeoLocationController {
 
 	@GetMapping(value = "/all")
 	public HttpEntity<List<GameLocation>> findAll( //
-			@RequestParam("latitude") double latitude, @RequestParam("longitude") double longitude, //
-			Pageable pageable) {
+			@RequestParam("latitude") final double latitude, @RequestParam("longitude") final double longitude, //
+			final Pageable pageable) {
 		final List<GameLocation> allPlacesWithinRange = getAllPlacesWithinRange(latitude, longitude);
 
 		final List<GameLocation> locations = getPage(pageable, allPlacesWithinRange);
@@ -50,8 +43,8 @@ public class GeoLocationController {
 
 	@GetMapping(value = "/all-open")
 	public HttpEntity<List<GameLocation>> findAllOpen( //
-			@RequestParam("latitude") double latitude, @RequestParam("longitude") double longitude, //
-			Pageable pageable) {
+			@RequestParam("latitude") final double latitude, @RequestParam("longitude") final double longitude, //
+			final Pageable pageable) {
 		final List<GameLocation> allPlacesWithinRange = getAllPlacesWithinRange(latitude, longitude);
 		final List<GameLocation> allOpenPlacesWithinRange = allPlacesWithinRange.stream().filter(p -> !p.isMarked())
 				.collect(Collectors.toList());
@@ -60,7 +53,7 @@ public class GeoLocationController {
 		return new ResponseEntity<>(locations, HttpStatus.OK);
 	}
 
-	private List<GameLocation> getAllPlacesWithinRange(double latitude, double longitude) {
+	private List<GameLocation> getAllPlacesWithinRange(final double latitude, final double longitude) {
 		final GeoLocation fromLocation = GeoLocation.fromDegrees(latitude, longitude);
 		return locationService.findPlacesWithinDistance(fromLocation, distance);
 	}
@@ -74,7 +67,7 @@ public class GeoLocationController {
 	}
 	
 	@PutMapping(value = "/{id}")
-	public HttpEntity<String> conquer(@PathVariable(name = "id") long locationId, @RequestBody Long userId) {
+	public HttpEntity<String> conquer(@PathVariable(name = "id") final long locationId, @RequestBody final Long userId) {
 		try {
 			locationService.conquerLocation(locationId, userId);
 		} catch (LocationNotFoundException e) {
