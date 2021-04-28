@@ -21,12 +21,12 @@ The system does not have db layer, and all interactions are done on the service 
 
 The controllers expose API endpoints to accomplish operations stated at the beginning. There are two endpoint roots:
 
-- `/locations` - operations related to films
-    * `GET /all` - returns list of all locations near users current location paginated
-    * `GET /all-open` - returns list of all locations yet to be conquered near users current location paginated
-    * `PUT /{locationId}` - conqueres a location and increases user points
-- `/users` - operations related to rentals
-    * `GET /{userId}` - returs user points
+- `/locations` - operations related to locations
+    * `GET /locations/all` - returns list of all locations near users current location (paginated)
+    * `GET /locations/all-open` - returns list of all locations yet to be conquered near users current location (paginated)
+    * `PUT /locations/{locationId}` - conquers a location and increases user points
+- `/users` - operations related to users
+    * `GET /users/{userId}/points` - returns user points
 
 ### Building, Running and Testing
 
@@ -39,7 +39,7 @@ or alternatively using your installed maven version
 mvn clean spring-boot:run
 ```
 
-To see the application in action you can use `curl` or `postman` collection provided.
+To see the application in action you can use `swagger` collection provided.
 
 ### Future improvements
 
