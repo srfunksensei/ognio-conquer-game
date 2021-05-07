@@ -6,12 +6,12 @@ import com.mb.model.GameLocation;
 import com.mb.model.GeoLocation;
 import com.mb.service.PlaceLoaderStrategy;
 import com.mb.service.UserService;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,11 +19,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class GeoLocationServiceImplTest {
 
 	private static final GeoLocation BELGRADE_LOC = GeoLocation.fromDegrees(44.787197, 20.457273);
@@ -43,11 +41,10 @@ public class GeoLocationServiceImplTest {
 
 	private GeoLocationServiceImpl geoLocationService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		when(loaderMock.load(any())).thenReturn(LOCATIONS_NEAR_BELGRADE);
-		doNothing().when(userServiceMock).increasePoints(anyLong(), anyLong());
-		
+
 		geoLocationService = new GeoLocationServiceImpl(loaderMock, userServiceMock);
 	}
 
@@ -56,7 +53,7 @@ public class GeoLocationServiceImplTest {
 		final double distanceInKm = 0.001d;
 
 		final List<GameLocation> result = geoLocationService.findPlacesWithinDistance(BELGRADE_LOC, distanceInKm);
-		Assert.assertEquals(0, result.size());
+		Assertions.assertEquals(0, result.size());
 	}
 
 	@Test
@@ -64,7 +61,7 @@ public class GeoLocationServiceImplTest {
 		final double distanceInKm = 0.011d;
 
 		final List<GameLocation> result = geoLocationService.findPlacesWithinDistance(BELGRADE_LOC, distanceInKm);
-		Assert.assertEquals(2, result.size());
+		Assertions.assertEquals(2, result.size());
 	}
 
 	@Test
@@ -72,31 +69,31 @@ public class GeoLocationServiceImplTest {
 		final double distanceInKm = 0.1d;
 
 		final List<GameLocation> result = geoLocationService.findPlacesWithinDistance(BELGRADE_LOC, distanceInKm);
-		Assert.assertEquals(3, result.size());
+		Assertions.assertEquals(3, result.size());
 	}
 
 	@Test
 	public void getLocation_NoLocationWithId() {
 		final Optional<GameLocation> locationOpt = geoLocationService.getLocation(22);
-		Assert.assertFalse(locationOpt.isPresent());
+		Assertions.assertFalse(locationOpt.isPresent());
 	}
 
 	@Test
 	public void getLocation() {
 		final Optional<GameLocation> locationOpt = geoLocationService.getLocation(1);
-		Assert.assertTrue(locationOpt.isPresent());
+		Assertions.assertTrue(locationOpt.isPresent());
 	}
 	
-	@Test(expected = LocationNotFoundException.class)
-	public void conquerLocation_NoLocationFoundForConquering() throws LocationNotFoundException, LocationAlreadyConqueredException {
-		geoLocationService.conquerLocation(12345, 12345);
+	@Test
+	public void conquerLocation_NoLocationFoundForConquering() {
+		Assertions.assertThrows(LocationNotFoundException.class, () -> geoLocationService.conquerLocation(12345, 12345));
 	}
 	
-	@Test(expected = LocationAlreadyConqueredException.class)
-	public void conquerLocation_LocationAlreadyConquered() throws LocationNotFoundException, LocationAlreadyConqueredException {
+	@Test
+	public void conquerLocation_LocationAlreadyConquered() {
 		final long id = LOC_11M_RADIUS.getId();
-		
-		geoLocationService.conquerLocation(id, 12345);
+
+		Assertions.assertThrows(LocationAlreadyConqueredException.class, () -> geoLocationService.conquerLocation(id, 12345));
 	}
 	
 	@Test
@@ -108,10 +105,10 @@ public class GeoLocationServiceImplTest {
 		try {
 			geoLocationService.conquerLocation(id, 12345);
 		} catch (LocationNotFoundException | LocationAlreadyConqueredException e) {
-			Assert.fail("Should not throw exception");
+			Assertions.fail("Should not throw exception");
 		}
 		
-		Assert.assertTrue(LOC_5M_RADIUS.isMarked());
+		Assertions.assertTrue(LOC_5M_RADIUS.isMarked());
 		
 		// return to original state
 		LOC_5M_RADIUS.setMarked(isMarked);

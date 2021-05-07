@@ -1,66 +1,45 @@
 package com.mb.service.util;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import com.mb.model.GameLocation;
+import org.assertj.core.util.Files;
+import org.json.simple.parser.ParseException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.assertj.core.util.Files;
-import org.json.simple.parser.ParseException;
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.mb.model.GameLocation;
-
 public class JsonGameLocationFileReaderTest {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testInvalidExtensionFileName() {
-		try {
-			new JsonGameLocationFileReader("test.txt");
-		} catch (FileNotFoundException e) {
-			Assert.fail("expected IllegalArgumentException, but instead reader was created");
-		}
+		Assertions.assertThrows(IllegalArgumentException.class, () -> new JsonGameLocationFileReader("test.txt"));
 	}
 
-	@Test(expected = FileNotFoundException.class)
-	public void testUnknownFileByFileName() throws FileNotFoundException {
-		new JsonGameLocationFileReader("test.json");
+	@Test
+	public void testUnknownFileByFileName() {
+		Assertions.assertThrows(FileNotFoundException.class, () -> new JsonGameLocationFileReader("test.json"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testInvalidFileExtension() {
-		try {
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			final File f = new File("test.txt");
 			new JsonGameLocationFileReader(f);
-		} catch (FileNotFoundException e) {
-			Assert.fail("expected IllegalArgumentException, but instead reader was created");
-		}
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testDirectory() {
 		final File f = Files.newTemporaryFolder();
-		try {
-			new JsonGameLocationFileReader(f);
-		} catch (FileNotFoundException e) {
-			Assert.fail("expected IllegalArgumentException, but instead reader was created");
-		}
+		Assertions.assertThrows(IllegalArgumentException.class, () -> new JsonGameLocationFileReader(f));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNoFileExtension() {
 		final File f = Files.newTemporaryFile();
-		try {
-			new JsonGameLocationFileReader(f);
-		} catch (FileNotFoundException e) {
-			Assert.fail("expected IllegalArgumentException, but instead reader was created");
-		}
+		Assertions.assertThrows(IllegalArgumentException.class, () -> new JsonGameLocationFileReader(f));
 	}
 
 	private static final String TEST_JSON_FILE_NAME = "test.json";
@@ -78,26 +57,26 @@ public class JsonGameLocationFileReaderTest {
 			final JsonGameLocationFileReader reader = new JsonGameLocationFileReader(f);
 			reader.read();
 		} catch (FileNotFoundException e) {
-			Assert.fail("Expected to create new reader");
+			Assertions.fail("Expected to create new reader");
 		} catch (IOException | ParseException e) {
 			// expected behavior
 		}
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testBadFormedJson() {
 		final File f = createNewFileInTempDir(TEST_JSON_FILE_NAME);
 
 		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8))) {
 			writer.write("{}");
 		} catch (Exception e1) {
-			Assert.fail("Expected to write data to file");
+			Assertions.fail("Expected to write data to file");
 		}
 
 		try {
 			final JsonGameLocationFileReader reader = new JsonGameLocationFileReader(f);
-			reader.read();
-		} catch (IOException | ParseException e) {
+			Assertions.assertThrows(NullPointerException.class, reader::read);
+		} catch (IOException e) {
 			// expected behavior
 		}
 	}
@@ -114,16 +93,16 @@ public class JsonGameLocationFileReaderTest {
 					"}";
 			writer.write(value);
 		} catch (Exception e1) {
-			Assert.fail("Expected to write data to file");
+			Assertions.fail("Expected to write data to file");
 		}
 
 		try {
 			final JsonGameLocationFileReader reader = new JsonGameLocationFileReader(f);
 			final List<GameLocation> locations = reader.read();
 			
-			Assert.assertEquals(0, locations.size());
+			Assertions.assertEquals(0, locations.size());
 		} catch (IOException | ParseException e) {
-			Assert.fail("Expected to read file");
+			Assertions.fail("Expected to read file");
 		}
 	}
 
@@ -155,20 +134,20 @@ public class JsonGameLocationFileReaderTest {
 					"}";
 			writer.write(value);
 		} catch (Exception e1) {
-			Assert.fail("Expected to write data to file");
+			Assertions.fail("Expected to write data to file");
 		}
 
 		try {
 			final JsonGameLocationFileReader reader = new JsonGameLocationFileReader(f);
 			final List<GameLocation> locations = reader.read();
 			
-			Assert.assertEquals(1, locations.size());
-			Assert.assertEquals(loc.getId(), locations.get(0).getId());
-			Assert.assertEquals(loc.getDegLat(), locations.get(0).getDegLat(), 0.01);
-			Assert.assertEquals(loc.getDegLon(), locations.get(0).getDegLon(), 0.01);
-			Assert.assertEquals(loc.isMarked(), locations.get(0).isMarked());
+			Assertions.assertEquals(1, locations.size());
+			Assertions.assertEquals(loc.getId(), locations.get(0).getId());
+			Assertions.assertEquals(loc.getDegLat(), locations.get(0).getDegLat(), 0.01);
+			Assertions.assertEquals(loc.getDegLon(), locations.get(0).getDegLon(), 0.01);
+			Assertions.assertEquals(loc.isMarked(), locations.get(0).isMarked());
 		} catch (IOException | ParseException e) {
-			Assert.fail("Expected to read file");
+			Assertions.fail("Expected to read file");
 		}
 	}
 
