@@ -41,6 +41,19 @@ mvn clean spring-boot:run
 
 To see the application in action you can use `swagger` collection provided.
 
+### Dockerizing app
+
+```bash
+$ mvn clean package
+$ docker build -t ognio-conquer-game:latest .
+```
+
+running docker image
+
+```bash
+$ docker run -it -p 8080:8080 ognio-conquer-game
+```
+
 ### Future improvements
 
 * use JWT for securing application
@@ -65,4 +78,8 @@ To see the application in action you can use `swagger` collection provided.
 | id PK |
 | userId FK |
 | locationId FK |
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
