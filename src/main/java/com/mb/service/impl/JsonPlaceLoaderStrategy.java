@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,24 +25,53 @@ public class JsonPlaceLoaderStrategy implements PlaceLoaderStrategy {
 	
 	@Override
 	public List<GameLocation> load(final Optional<String> filenameOpt) {
-		final ClassLoader classLoader = getClass().getClassLoader();
-
 		final List<GameLocation> locations = new ArrayList<>();
 		try {
 			final Path path = filenameOpt.isPresent() ?
 				Paths.get(filenameOpt.get()) :
-				Paths.get(classLoader.getResource(LOCATIONS_FILE_NAME).toURI());
+				getPathWithinJar();
 
 			final JsonGameLocationFileReader reader = new JsonGameLocationFileReader(path.toFile());
 			locations.addAll(reader.read());
-		} catch (URISyntaxException e) {
-			log.error("Could not read file");
-			e.printStackTrace();
 		} catch (IOException | ParseException e) {
 			log.error("Could not parse json file");
 			e.printStackTrace();
 		}
 
 		return locations;
+	}
+
+	private Path getPathWithinJar() {
+		try {
+			final ClassLoader classLoader = getClass().getClassLoader();
+			return Paths.get(classLoader.getResource(LOCATIONS_FILE_NAME).toURI());
+		} catch (Exception e) {
+			final InputStream inputStream = accessFile(LOCATIONS_FILE_NAME);
+			final File file = getFile(inputStream);
+			return file.toPath();
+		}
+	}
+
+	private File getFile(final InputStream in) {
+		File tempFile;
+		try {
+			tempFile = File.createTempFile("data", ".json");
+			tempFile.deleteOnExit();
+
+			Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			log.warn("Could not create or copy temp file " + e.getMessage());
+			throw new InvalidPathException("", e.getCause().toString());
+		}
+		return tempFile;
+	}
+
+	private InputStream accessFile(final String resource) {
+		// this is the path within the jar file
+		InputStream input = JsonPlaceLoaderStrategy.class.getResourceAsStream(resource);
+		if (input == null) {
+			input = JsonPlaceLoaderStrategy.class.getClassLoader().getResourceAsStream(resource);
+		}
+		return input;
 	}
 }
